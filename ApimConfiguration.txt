@@ -1,0 +1,21 @@
+<policies>
+	<inbound>
+		<set-variable name="SigningKey" value="bXloaWdobHlzdXBlcnNlY3JldGtleXdoaWNoY2FudGJlZGVjcmlwdGVk" />
+		<validate-jwt header-name="Token" failed-validation-httpcode="401" failed-validation-error-message="Unauthorized">
+			<issuer-signing-keys>
+				<key>@(context.Variables.GetValueOrDefault<string>("SigningKey"))</key>
+			</issuer-signing-keys>
+			<required-claims>
+				<claim name="role">
+					<value>authorizedUser</value>
+				</claim>
+			</required-claims>
+		</validate-jwt>
+		<rate-limit calls="5" renewal-period="60" />
+		<quota calls="100" renewal-period="604800" />
+	</inbound>
+	<backend>
+		<forward-request />
+	</backend>
+	<outbound />
+</policies>
