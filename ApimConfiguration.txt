@@ -11,11 +11,27 @@
 				</claim>
 			</required-claims>
 		</validate-jwt>
-		<rate-limit calls="5" renewal-period="60" />
-		<quota calls="100" renewal-period="604800" />
+		<choose>
+			<when condition="@(context.Request.Headers.GetValueOrDefault("Accept","").Contains("application/xml"))">
+				<set-header name="Accept" exists-action="delete">
+				</set-header>
+				<set-variable name="ToXml" value="True" />
+			</when>
+			<otherwise>
+				<set-variable name="ToXml" value="False" />
+			</otherwise>
+		</choose>
+		<base />
 	</inbound>
 	<backend>
-		<forward-request />
+		<base />
 	</backend>
-	<outbound />
+	<outbound>
+		<base />
+		<choose>
+			<when condition="@((string)context.Variables["ToXml"] == "True")">
+				<json-to-xml apply="always" consider-accept-header="false" />
+			</when>
+		</choose>
+	</outbound>
 </policies>
